@@ -316,6 +316,7 @@ public class HomeFragment extends Fragment implements MealAdapter.OnMealClickLis
 
     private void navigateToMealInputWithoutDate() {
         Intent intent = new Intent(getActivity(), meal_input.class);
+        intent.putExtra("USERNAME", String.valueOf(username));
         mealInputLauncher.launch(intent);
     }
 

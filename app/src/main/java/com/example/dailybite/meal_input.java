@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +24,18 @@ public class meal_input extends AppCompatActivity implements foodAdapter.OnFoodI
     private ImageButton addButton, closeButton;
     private String mealName;
 
+    //added
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private String username;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meal_input);
+
+        //Username for FIRESTORE saving
+        Intent i = getIntent();
+        username = i.getStringExtra("USERNAME");
 
         // Initialize views
         caloriesText = findViewById(R.id.caloriesText);
@@ -80,6 +90,17 @@ public class meal_input extends AppCompatActivity implements foodAdapter.OnFoodI
         resultIntent.putExtra("MEAL_PROTEINS", proteins);
         resultIntent.putExtra("MEAL_FATS", fats);
         resultIntent.putExtra("MEAL_CARBS", carbs);
+
+        //ADDED TO STORE TO FIRESTORE
+        // Add meal to the "meals" sub-collection under the user's document
+        db.collection("users").document(username).collection("meals")
+                .add(mealName) // Automatically generates a unique ID for the meal
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(this, "Meal saved to Firestore!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error saving meal: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
 
         // Set the result and finish the activity
         setResult(RESULT_OK, resultIntent);
