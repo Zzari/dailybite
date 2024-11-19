@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class CalorieIntakeActivity extends AppCompatActivity {
@@ -60,9 +61,8 @@ public class CalorieIntakeActivity extends AppCompatActivity {
         carbsText.setOnClickListener(v -> showEditDialog("Edit Carbs", carbsText, "g"));
         waterText.setOnClickListener(v -> showEditDialog("Edit Water", waterText, "ml"));
 
-        saveButton.setOnClickListener(v -> {
-            Toast.makeText(CalorieIntakeActivity.this, "Information saved!", Toast.LENGTH_SHORT).show();
-        });
+        saveButton.setOnClickListener(v -> saveIntakeData());
+
     }
 
     private void fetchIntakeData() {
@@ -107,5 +107,23 @@ public class CalorieIntakeActivity extends AppCompatActivity {
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+    }
+    private void saveIntakeData() {
+        String userId = mAuth.getCurrentUser ().getUid();
+        Map<String, Object> intakeData = new HashMap<>();
+        intakeData.put("calories", caloriesText.getText().toString().replace(" cal", ""));
+        intakeData.put("proteins", proteinsText.getText().toString().replace(" g", ""));
+        intakeData.put("fats", fatsText.getText().toString().replace(" g", ""));
+        intakeData.put("carbs", carbsText.getText().toString().replace(" g", ""));
+        intakeData.put("water", waterText.getText().toString().replace(" ml", ""));
+
+        db.collection("users").document(userId).update("intake", intakeData)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(CalorieIntakeActivity.this, "Intake data saved successfully!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error saving intake data", e);
+                    Toast.makeText(CalorieIntakeActivity.this, "Failed to save intake data", Toast.LENGTH_SHORT).show();
+                });
     }
 }

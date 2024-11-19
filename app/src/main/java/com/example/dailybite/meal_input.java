@@ -1,6 +1,7 @@
 package com.example.dailybite;
 
 import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -13,7 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class meal_input extends AppCompatActivity implements foodAdapter.OnFoodItemDeletedListener {
 
@@ -92,9 +95,11 @@ public class meal_input extends AppCompatActivity implements foodAdapter.OnFoodI
         resultIntent.putExtra("MEAL_CARBS", carbs);
 
         //ADDED TO STORE TO FIRESTORE
+
+        Meal meal = new Meal(newMealName, getCurrentTime(), Float.parseFloat(calories), Float.parseFloat(proteins), Float.parseFloat(fats), Float.parseFloat(carbs));
         // Add meal to the "meals" sub-collection under the user's document
         db.collection("users").document(username).collection("meals")
-                .add(mealName) // Automatically generates a unique ID for the meal
+                .add(meal) // Automatically generates a unique ID for the meal
                 .addOnSuccessListener(documentReference -> {
                     Toast.makeText(this, "Meal saved to Firestore!", Toast.LENGTH_SHORT).show();
                 })
@@ -108,6 +113,11 @@ public class meal_input extends AppCompatActivity implements foodAdapter.OnFoodI
                 " Proteins: " + proteins + " Fats: " + fats + " Carbs: " + carbs, Toast.LENGTH_SHORT).show();
 
         finish();
+    }
+
+    // Helper method to get the current time in the required format
+    private String getCurrentTime() {
+        return new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(new Date());
     }
 
     // Sample data for food items
